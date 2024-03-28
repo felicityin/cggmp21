@@ -21,7 +21,6 @@ mod utils;
 extern crate alloc;
 
 use alloc::vec::Vec;
-// use core::error;
 
 use digest::Digest;
 use generic_ec::Curve;

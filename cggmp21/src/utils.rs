@@ -1,3 +1,7 @@
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use generic_ec::{Curve, Scalar};
 use paillier_zk::rug::{self, Integer};
 use paillier_zk::{

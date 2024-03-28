@@ -1,3 +1,7 @@
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use digest::Digest;
 use futures::SinkExt;
 use paillier_zk::{
@@ -474,7 +478,7 @@ where
         p,
         q,
         parties: party_auxes,
-        security_level: std::marker::PhantomData,
+        security_level: core::marker::PhantomData,
     };
 
     if compute_multiexp_table {

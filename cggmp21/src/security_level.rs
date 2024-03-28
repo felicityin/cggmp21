@@ -56,7 +56,7 @@ pub trait SecurityLevel: KeygenSecurityLevel {
 ///
 /// Returns `(x_bits, y_bits)`
 pub fn max_exponents_size<L: SecurityLevel>() -> (u32, u32) {
-    use std::cmp;
+    use core::cmp;
 
     let x_bits = cmp::max(
         L::ELL as u32 + L::EPSILON as u32 + 4 * L::SECURITY_BITS,

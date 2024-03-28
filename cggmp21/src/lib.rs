@@ -232,6 +232,9 @@
 //! complicated protcol as CGGMP21 and impossible to do in our specific deployment. Thus, we intentionally
 //! don't do constant-time operations which gives us a significant performance boost.
 
+#![no_std]
+#![feature(error_in_core)]
+
 #![allow(
     non_snake_case,
     mixed_script_confusables,
@@ -242,6 +245,9 @@
 #![forbid(clippy::disallowed_methods, missing_docs, unsafe_code)]
 #![cfg_attr(not(test), forbid(unused_crate_dependencies))]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
+
+#[macro_use]
+extern crate alloc;
 
 #[cfg(feature = "hd-wallets")]
 pub use slip_10;

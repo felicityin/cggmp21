@@ -8,7 +8,7 @@ use paillier_zk::{
 use rand_core::{RngCore, SeedableRng};
 use serde::{Deserialize, Serialize};
 use serde_with::serde_as;
-use thiserror::Error;
+use thiserror_no_std::Error;
 
 struct Challenge<const M: usize> {
     es: [bool; M],

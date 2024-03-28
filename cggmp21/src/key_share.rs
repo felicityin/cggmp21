@@ -1,13 +1,16 @@
 //! Key share
 
-use std::ops;
-use std::sync::Arc;
+extern crate alloc;
+
+use alloc::vec::Vec;
+use alloc::sync::Arc;
+use core::ops;
 
 use generic_ec::{Curve, Point, SecretScalar};
 use paillier_zk::paillier_encryption_in_range as π_enc;
 use paillier_zk::rug::{Complete, Integer};
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
+use thiserror_no_std::Error;
 
 use crate::security_level::SecurityLevel;
 
@@ -43,7 +46,7 @@ pub struct DirtyAuxInfo<L: SecurityLevel = crate::default_choice::SecurityLevel>
     pub parties: Vec<PartyAux>,
     /// Security level that was used to generate aux info
     #[serde(skip)]
-    pub security_level: std::marker::PhantomData<L>,
+    pub security_level: core::marker::PhantomData<L>,
 }
 
 /// Dirty (unvalidated) key share

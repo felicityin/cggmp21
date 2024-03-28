@@ -1,5 +1,9 @@
 //! Signing protocol
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use digest::Digest;
 use futures::SinkExt;
 use generic_ec::{coords::AlwaysHasAffineX, Curve, NonZero, Point, Scalar, SecretScalar};
@@ -18,7 +22,7 @@ use round_based::{
     Delivery, Mpc, MpcParty, MsgId, Outgoing, PartyIndex,
 };
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
+use thiserror_no_std::Error;
 
 use crate::errors::IoError;
 use crate::key_share::{KeyShare, PartyAux, VssSetup};
@@ -226,7 +230,7 @@ pub struct SigningBuilder<
     execution_id: ExecutionId<'r>,
     tracer: Option<&'r mut dyn Tracer>,
     enforce_reliable_broadcast: bool,
-    _digest: std::marker::PhantomData<D>,
+    _digest: core::marker::PhantomData<D>,
 
     #[cfg(feature = "hd-wallets")]
     additive_shift: Option<Scalar<E>>,
@@ -253,7 +257,7 @@ where
             execution_id: eid,
             tracer: None,
             enforce_reliable_broadcast: true,
-            _digest: std::marker::PhantomData,
+            _digest: core::marker::PhantomData,
             #[cfg(feature = "hd-wallets")]
             additive_shift: None,
         }
@@ -271,7 +275,7 @@ where
             tracer: self.tracer,
             enforce_reliable_broadcast: self.enforce_reliable_broadcast,
             execution_id: self.execution_id,
-            _digest: std::marker::PhantomData,
+            _digest: core::marker::PhantomData,
             #[cfg(feature = "hd-wallets")]
             additive_shift: self.additive_shift,
         }

@@ -29,7 +29,7 @@ rand_chacha = { version = "0.3", default-features = false }
 
 futures = "0.3"
 
-thiserror = "1"
+thiserror-no-std = "2.0"
 
 serde = { version = "1", features = ["derive", "rc"] }
 serde_with = { version = "2" }

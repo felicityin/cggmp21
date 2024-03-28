@@ -5,11 +5,15 @@ mod aux_only;
 /// Non-threshold key refresh specific types
 mod non_threshold;
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use digest::Digest;
 use generic_ec::Curve;
 use rand_core::{CryptoRng, RngCore};
 use round_based::Mpc;
-use thiserror::Error;
+use thiserror_no_std::Error;
 
 use crate::{
     errors::IoError,
@@ -46,7 +50,7 @@ pub mod msg {
 pub struct PregeneratedPrimes<L = crate::default_choice::SecurityLevel> {
     p: Integer,
     q: Integer,
-    _phantom: std::marker::PhantomData<L>,
+    _phantom: core::marker::PhantomData<L>,
 }
 
 impl<L: SecurityLevel> PregeneratedPrimes<L> {
@@ -63,7 +67,7 @@ impl<L: SecurityLevel> PregeneratedPrimes<L> {
             Some(Self {
                 p,
                 q,
-                _phantom: std::marker::PhantomData,
+                _phantom: core::marker::PhantomData,
             })
         }
     }
@@ -78,7 +82,7 @@ impl<L: SecurityLevel> PregeneratedPrimes<L> {
         Self {
             p: fast_paillier::utils::generate_safe_prime(rng, 4 * L::SECURITY_BITS),
             q: fast_paillier::utils::generate_safe_prime(rng, 4 * L::SECURITY_BITS),
-            _phantom: std::marker::PhantomData,
+            _phantom: core::marker::PhantomData,
         }
     }
 }
@@ -112,7 +116,7 @@ where
     enforce_reliable_broadcast: bool,
     precompute_multiexp_tables: bool,
     precompute_crt: bool,
-    _digest: std::marker::PhantomData<D>,
+    _digest: core::marker::PhantomData<D>,
 }
 
 /// A marker for [`KeyRefreshBuilder`]
@@ -145,7 +149,7 @@ where
             enforce_reliable_broadcast: true,
             precompute_multiexp_tables: false,
             precompute_crt: false,
-            _digest: std::marker::PhantomData,
+            _digest: core::marker::PhantomData,
         }
     }
 
@@ -195,7 +199,7 @@ where
             enforce_reliable_broadcast: true,
             precompute_multiexp_tables: false,
             precompute_crt: false,
-            _digest: std::marker::PhantomData,
+            _digest: core::marker::PhantomData,
         }
     }
 
@@ -238,7 +242,7 @@ where
             enforce_reliable_broadcast: self.enforce_reliable_broadcast,
             precompute_multiexp_tables: self.precompute_multiexp_tables,
             precompute_crt: self.precompute_crt,
-            _digest: std::marker::PhantomData,
+            _digest: core::marker::PhantomData,
         }
     }
 

@@ -1,4 +1,3 @@
-use anyhow::Context;
 use cggmp21::{
     key_share::Validate,
     progress::PerfProfiler,
@@ -187,8 +186,7 @@ async fn do_becnhmarks<L: SecurityLevel>(args: Args) {
                         let aux_data = cggmp21::aux_info_gen(eid, i, n, pregen)
                             .set_progress_tracer(&mut profiler)
                             .start(&mut party_rng, party)
-                            .await
-                            .context("aux data gen failed")?;
+                            .await.unwrap();
                         let report = profiler.get_report().unwrap();
                         Ok::<_, anyhow::Error>((aux_data, report))
                     }

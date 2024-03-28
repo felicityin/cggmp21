@@ -297,7 +297,7 @@ dependencies = [
  "serde_with 2.3.3",
  "sha2",
  "slip-10",
- "thiserror",
+ "thiserror-no-std",
  "udigest",
 ]
 

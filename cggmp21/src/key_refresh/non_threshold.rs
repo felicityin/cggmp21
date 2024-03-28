@@ -1,3 +1,7 @@
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use digest::Digest;
 use futures::SinkExt;
 use generic_ec::{Curve, Point, Scalar, SecretScalar};
@@ -685,7 +689,7 @@ where
         p,
         q,
         parties: party_auxes,
-        security_level: std::marker::PhantomData,
+        security_level: core::marker::PhantomData,
     };
 
     if build_multiexp_tables {

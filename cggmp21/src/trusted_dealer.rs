@@ -22,7 +22,11 @@
 //! # Ok::<_, cggmp21::trusted_dealer::TrustedDealerError>(())
 //! ```
 
-use std::{iter, marker::PhantomData};
+extern crate alloc;
+
+use alloc::vec::Vec;
+
+use core::{iter, marker::PhantomData};
 
 use generic_ec::{Curve, SecretScalar};
 use paillier_zk::{
@@ -30,7 +34,7 @@ use paillier_zk::{
     IntegerExt,
 };
 use rand_core::{CryptoRng, RngCore};
-use thiserror::Error;
+use thiserror_no_std::Error;
 
 use crate::{
     key_share::{
