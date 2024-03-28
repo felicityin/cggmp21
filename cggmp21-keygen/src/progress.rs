@@ -5,10 +5,17 @@
 //!
 //! Out of box, there's [`PerfProfiler`] which can be used to bechmark a protocol.
 
-use std::fmt;
-use std::time::{Duration, Instant};
+extern crate alloc;
 
-use thiserror::Error;
+use alloc::vec::Vec;
+
+use core::fmt;
+use core::time::Duration;
+
+// use embedded_time::Clock;
+use embedded_time::rate::Fraction;
+use embedded_time::Instant;
+use thiserror_no_std::Error;
 
 /// Traces progress of protocol execution
 ///
@@ -119,9 +126,12 @@ impl<T: Tracer> Tracer for Option<T> {
 /// passed between each step of protocol. After protocol is completed, you can obtain a [`PerfReport`] via
 /// [`.get_report()`](PerfProfiler::get_report) method that contains all the measurements.
 pub struct PerfProfiler {
-    last_timestamp: Option<Instant>,
+    #[allow(unused)]
+    last_timestamp: Option<Instant<DemoClock>>,
+    #[allow(unused)]
     ongoing_stage: Option<usize>,
-    protocol_began: Option<Instant>,
+    #[allow(unused)]
+    protocol_began: Option<Instant<DemoClock>>,
     report: PerfReport,
     error: Option<ProfileError>,
 }
@@ -178,6 +188,7 @@ enum ErrorReason {
     #[error("tracing stage or sending/receiving message but round never began")]
     RoundNeverBegan,
     #[error("stage is ongoing, but it can't be finished with that event: {event:?}")]
+    #[allow(unused)]
     CantFinishStage { event: Event },
 }
 
@@ -219,102 +230,106 @@ impl PerfProfiler {
         }
     }
 
-    fn try_trace_event(&mut self, event: Event) -> Result<(), ProfileError> {
-        let now = Instant::now();
+    fn try_trace_event(&mut self, _event: Event) -> Result<(), ProfileError> {
+        // let some_clock = DemoClock;
+        // let now = some_clock.try_now().unwrap();
 
-        if Self::event_can_finish_ongoing_stage(&event) {
-            if let Some(stage_i) = self.ongoing_stage.take() {
-                let last_timestamp = self.last_timestamp()?;
+        // if Self::event_can_finish_ongoing_stage(&event) {
+        //     if let Some(stage_i) = self.ongoing_stage.take() {
+        //         let last_timestamp = self.last_timestamp()?;
 
-                if !self.report.rounds.is_empty() {
-                    let last_round = self.last_round_mut()?;
-                    last_round.stages[stage_i].duration += now - last_timestamp;
-                } else {
-                    self.report.setup_stages[stage_i].duration += now - last_timestamp;
-                }
-            }
-        } else if self.ongoing_stage.is_some() {
-            return Err(ErrorReason::CantFinishStage { event }.into());
-        }
-        match event {
-            Event::ProtocolBegins => {
-                self.protocol_began = Some(now);
-            }
-            Event::RoundBegins { name } => {
-                let last_timestamp = self.last_timestamp()?;
-                match self.report.rounds.last_mut() {
-                    None => self.report.setup += now - last_timestamp,
-                    Some(last_round) => last_round.computation += now - last_timestamp,
-                }
-                self.report.rounds.push(RoundDuration {
-                    round_name: name,
-                    stages: vec![],
-                    computation: Duration::ZERO,
-                    sending: Duration::ZERO,
-                    receiving: Duration::ZERO,
-                })
-            }
-            Event::Stage { name } => {
-                let last_timestamp = self.last_timestamp()?;
+        //         if !self.report.rounds.is_empty() {
+        //             let last_round = self.last_round_mut()?;
+        //             last_round.stages[stage_i].duration += now - last_timestamp;
+        //         } else {
+        //             self.report.setup_stages[stage_i].duration += now - last_timestamp;
+        //         }
+        //     }
+        // } else if self.ongoing_stage.is_some() {
+        //     return Err(ErrorReason::CantFinishStage { event }.into());
+        // }
+        // match event {
+        //     Event::ProtocolBegins => {
+        //         self.protocol_began = Some(now);
+        //     }
+        //     Event::RoundBegins { name } => {
+        //         let last_timestamp = self.last_timestamp()?;
+        //         match self.report.rounds.last_mut() {
+        //             None => self.report.setup += now - last_timestamp,
+        //             Some(last_round) => last_round.computation += now - last_timestamp,
+        //         }
+        //         self.report.rounds.push(RoundDuration {
+        //             round_name: name,
+        //             stages: vec![],
+        //             computation: Duration::ZERO,
+        //             sending: Duration::ZERO,
+        //             receiving: Duration::ZERO,
+        //         })
+        //     }
+        //     Event::Stage { name } => {
+        //         let last_timestamp = self.last_timestamp()?;
 
-                let stages = if !self.report.rounds.is_empty() {
-                    let last_round = self.last_round_mut()?;
-                    last_round.computation += now - last_timestamp;
+        //         let stages = if !self.report.rounds.is_empty() {
+        //             let last_round = self.last_round_mut()?;
+        //             last_round.computation += now - last_timestamp;
 
-                    &mut last_round.stages
-                } else {
-                    self.report.setup += now - last_timestamp;
-                    &mut self.report.setup_stages
-                };
+        //             &mut last_round.stages
+        //         } else {
+        //             self.report.setup += now - last_timestamp;
+        //             &mut self.report.setup_stages
+        //         };
 
-                let stage_i = stages.iter().position(|s| s.name == name);
-                let stage_i = match stage_i {
-                    Some(i) => i,
-                    None => {
-                        stages.push(StageDuration {
-                            name,
-                            duration: Duration::ZERO,
-                        });
-                        stages.len() - 1
-                    }
-                };
-                self.ongoing_stage = Some(stage_i);
-            }
-            Event::ReceiveMsgs => {
-                let last_timestamp = self.last_timestamp()?;
-                let last_round = self.last_round_mut()?;
-                last_round.computation += now - last_timestamp;
-            }
-            Event::MsgsReceived => {
-                let last_timestamp = self.last_timestamp()?;
-                let last_round = self.last_round_mut()?;
-                last_round.receiving += now - last_timestamp;
-            }
-            Event::SendMsg => {
-                let last_timestamp = self.last_timestamp()?;
-                let last_round = self.last_round_mut()?;
-                last_round.computation += now - last_timestamp;
-            }
-            Event::MsgSent => {
-                let last_timestamp = self.last_timestamp()?;
-                let last_round = self.last_round_mut()?;
-                last_round.sending += now - last_timestamp;
-            }
-            Event::ProtocolEnds => {
-                let last_timestamp = self.last_timestamp()?;
-                let last_round = self.last_round_mut()?;
-                last_round.computation += now - last_timestamp;
-            }
-        }
+        //         let stage_i = stages.iter().position(|s| s.name == name);
+        //         let stage_i = match stage_i {
+        //             Some(i) => i,
+        //             None => {
+        //                 stages.push(StageDuration {
+        //                     name,
+        //                     duration: Duration::ZERO,
+        //                 });
+        //                 stages.len() - 1
+        //             }
+        //         };
+        //         self.ongoing_stage = Some(stage_i);
+        //     }
+        //     Event::ReceiveMsgs => {
+        //         let last_timestamp = self.last_timestamp()?;
+        //         let last_round = self.last_round_mut()?;
+        //         last_round.computation += now - last_timestamp;
+        //     }
+        //     Event::MsgsReceived => {
+        //         let last_timestamp = self.last_timestamp()?;
+        //         let last_round = self.last_round_mut()?;
+        //         last_round.receiving += now - last_timestamp;
+        //     }
+        //     Event::SendMsg => {
+        //         let last_timestamp = self.last_timestamp()?;
+        //         let last_round = self.last_round_mut()?;
+        //         last_round.computation += now - last_timestamp;
+        //     }
+        //     Event::MsgSent => {
+        //         let last_timestamp = self.last_timestamp()?;
+        //         let last_round = self.last_round_mut()?;
+        //         last_round.sending += now - last_timestamp;
+        //     }
+        //     Event::ProtocolEnds => {
+        //         let last_timestamp = self.last_timestamp()?;
+        //         let last_round = self.last_round_mut()?;
+        //         last_round.computation += now - last_timestamp;
+        //     }
+        // }
 
-        self.last_timestamp = Some(now);
+        // self.last_timestamp = Some(now);
         Ok(())
     }
 
-    fn last_timestamp(&self) -> Result<Instant, ProfileError> {
+    #[allow(unused)]
+    fn last_timestamp(&self) -> Result<Instant<DemoClock>, ProfileError> {
         let last_timestamp = self.last_timestamp.ok_or(ErrorReason::ProtocolNeverBegan)?;
         Ok(last_timestamp)
     }
+
+    #[allow(unused)]
     fn last_round_mut(&mut self) -> Result<&mut RoundDuration, ProfileError> {
         let last_round = self
             .report
@@ -323,6 +338,8 @@ impl PerfProfiler {
             .ok_or(ErrorReason::RoundNeverBegan)?;
         Ok(last_round)
     }
+
+    #[allow(unused)]
     fn event_can_finish_ongoing_stage(event: &Event) -> bool {
         matches!(
             event,
@@ -477,4 +494,15 @@ fn percent(part: Duration, total: Duration) -> impl fmt::Display {
     }
 
     Percentage(part, total)
+}
+
+struct DemoClock;
+
+impl embedded_time::Clock for DemoClock {
+    type T = u32;
+    const SCALING_FACTOR: Fraction = Fraction::new(1, 1_000);
+    
+    fn try_now(&self) -> Result<Instant<Self>, embedded_time::clock::Error> {
+        todo!()
+    }
 }

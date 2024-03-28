@@ -1,3 +1,7 @@
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use round_based::rounds_router::simple_store::RoundMsgs;
 use round_based::{MsgId, PartyIndex};
 

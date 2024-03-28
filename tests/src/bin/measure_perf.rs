@@ -103,9 +103,8 @@ async fn do_becnhmarks<L: SecurityLevel>(args: Args) {
                             .set_progress_tracer(&mut profiler)
                             .set_security_level::<L>()
                             .start(&mut party_rng, party)
-                            .await
-                            .context("keygen failed")?;
-                        let report = profiler.get_report().context("get perf report")?;
+                            .await.unwrap();
+                        let report = profiler.get_report().unwrap();
                         Ok::<_, anyhow::Error>((key_share, report))
                     }
                 });
@@ -149,9 +148,8 @@ async fn do_becnhmarks<L: SecurityLevel>(args: Args) {
                             .set_progress_tracer(&mut profiler)
                             .set_security_level::<L>()
                             .start(&mut party_rng, party)
-                            .await
-                            .context("keygen failed")?;
-                        let report = profiler.get_report().context("get perf report")?;
+                            .await.unwrap();
+                        let report = profiler.get_report().unwrap();
                         Ok::<_, anyhow::Error>((key_share, report))
                     }
                 });
@@ -191,7 +189,7 @@ async fn do_becnhmarks<L: SecurityLevel>(args: Args) {
                             .start(&mut party_rng, party)
                             .await
                             .context("aux data gen failed")?;
-                        let report = profiler.get_report().context("get perf report")?;
+                        let report = profiler.get_report().unwrap();
                         Ok::<_, anyhow::Error>((aux_data, report))
                     }
                 });
@@ -275,9 +273,8 @@ async fn do_becnhmarks<L: SecurityLevel>(args: Args) {
                     let _signature = cggmp21::signing(eid, i, signers_indexes_at_keygen, share)
                         .set_progress_tracer(&mut profiler)
                         .sign(&mut party_rng, party, message_to_sign)
-                        .await
-                        .context("signing failed")?;
-                    profiler.get_report().context("get perf report")
+                        .await.unwrap();
+                    profiler.get_report()
                 })
             }
 

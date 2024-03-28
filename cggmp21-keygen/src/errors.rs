@@ -1,12 +1,13 @@
-use std::convert::Infallible;
+use alloc::boxed::Box;
+use core::convert::Infallible;
 
 use round_based::rounds_router::{
     errors::{self as router_error, CompleteRoundError},
     simple_store::RoundInputError,
 };
-use thiserror::Error;
+use thiserror_no_std::Error;
 
-pub type BoxedError = Box<dyn std::error::Error + Send + Sync>;
+pub type BoxedError = Box<dyn core::error::Error + Send + Sync>;
 
 #[derive(Debug, Error)]
 pub enum IoError {
@@ -21,11 +22,11 @@ pub enum IoError {
 }
 
 impl IoError {
-    pub fn send_message<E: std::error::Error + Send + Sync + 'static>(err: E) -> Self {
+    pub fn send_message<E: core::error::Error + Send + Sync + 'static>(err: E) -> Self {
         Self::SendMessage(Box::new(err))
     }
 
-    pub fn receive_message<E: std::error::Error + Send + Sync + 'static>(
+    pub fn receive_message<E: core::error::Error + Send + Sync + 'static>(
         err: CompleteRoundError<RoundInputError, E>,
     ) -> Self {
         match err {

@@ -1,3 +1,6 @@
+#![no_std]
+#![feature(error_in_core)]
+
 //! Threshold and non-threshold CGGMP21 DKG
 #![allow(non_snake_case, clippy::too_many_arguments)]
 
@@ -14,11 +17,17 @@ mod execution_id;
 mod rng;
 mod utils;
 
+#[macro_use]
+extern crate alloc;
+
+use alloc::vec::Vec;
+// use core::error;
+
 use digest::Digest;
 use generic_ec::Curve;
 use rand_core::{CryptoRng, RngCore};
 use round_based::{Mpc, MsgId, PartyIndex};
-use thiserror::Error;
+use thiserror_no_std::Error;
 
 #[doc(inline)]
 pub use key_share;
@@ -84,7 +93,7 @@ pub struct GenericKeygenBuilder<'a, E: Curve, M, L: SecurityLevel, D: Digest> {
     tracer: Option<&'a mut dyn Tracer>,
     #[cfg(feature = "hd-wallets")]
     hd_enabled: bool,
-    _params: std::marker::PhantomData<(E, L, D)>,
+    _params: core::marker::PhantomData<(E, L, D)>,
 }
 
 /// Indicates non-threshold DKG
@@ -111,7 +120,7 @@ where
             tracer: None,
             #[cfg(feature = "hd-wallets")]
             hd_enabled: true,
-            _params: std::marker::PhantomData,
+            _params: core::marker::PhantomData,
         }
     }
 }
@@ -133,7 +142,7 @@ where
             tracer: self.tracer,
             #[cfg(feature = "hd-wallets")]
             hd_enabled: self.hd_enabled,
-            _params: std::marker::PhantomData,
+            _params: core::marker::PhantomData,
         }
     }
     /// Specifies another hash function to use
@@ -150,7 +159,7 @@ where
             tracer: self.tracer,
             #[cfg(feature = "hd-wallets")]
             hd_enabled: self.hd_enabled,
-            _params: std::marker::PhantomData,
+            _params: core::marker::PhantomData,
         }
     }
 
@@ -168,7 +177,7 @@ where
             tracer: self.tracer,
             #[cfg(feature = "hd-wallets")]
             hd_enabled: self.hd_enabled,
-            _params: std::marker::PhantomData,
+            _params: core::marker::PhantomData,
         }
     }
 

@@ -1,3 +1,7 @@
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use digest::Digest;
 use futures::SinkExt;
 use generic_ec::{Curve, Point, Scalar, SecretScalar};
