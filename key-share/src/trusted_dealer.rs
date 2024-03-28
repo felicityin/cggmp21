@@ -20,6 +20,10 @@
 //! # Ok::<_, key_share::trusted_dealer::TrustedDealerError>(())
 //! ```
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 use generic_ec::{Curve, Point, Scalar, SecretScalar};
 
 use crate::{CoreKeyShare, VssSetup};
@@ -120,7 +124,7 @@ impl<E: Curve> TrustedDealerBuilder<E> {
                 .collect::<Vec<_>>();
             (pk, shares)
         } else {
-            let mut shares = std::iter::repeat_with(|| SecretScalar::<E>::random(rng))
+            let mut shares = core::iter::repeat_with(|| SecretScalar::<E>::random(rng))
                 .take((self.n - 1).into())
                 .collect::<Vec<_>>();
             shares.push(SecretScalar::new(
@@ -171,11 +175,11 @@ impl<E: Curve> TrustedDealerBuilder<E> {
 }
 
 /// Error explaining why trusted dealer failed to generate shares
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror_no_std::Error)]
 #[error(transparent)]
 pub struct TrustedDealerError(#[from] Reason);
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror_no_std::Error)]
 enum Reason {
     #[error("trusted dealer failed to generate shares due to internal error")]
     InvalidKeyShare(#[source] crate::InvalidCoreShare),

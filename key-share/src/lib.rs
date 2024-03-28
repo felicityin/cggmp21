@@ -11,11 +11,17 @@
 //! is a type-guard stating that the value `T` it holds was validated. So, `Valid<DirtyCoreKeyShare>` (or
 //! [`CoreKeyShare`] type alias) can be used to express that only valid key shares are accepted.
 
+#![no_std]
+#![feature(error_in_core)]
+
 #![allow(non_snake_case)]
 #![deny(missing_docs, clippy::unwrap_used, clippy::expect_used, clippy::panic)]
 #![forbid(unused_crate_dependencies)]
 #![cfg_attr(docsrs, feature(doc_auto_cfg))]
 
+extern crate alloc;
+
+use alloc::vec::Vec;
 use core::ops;
 
 use generic_ec::{serde::CurveName, Curve, NonZero, Point, Scalar, SecretScalar};
@@ -384,11 +390,11 @@ impl<E: Curve> AsRef<CoreKeyShare<E>> for CoreKeyShare<E> {
 }
 
 /// Error indicating that key share is not valid
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror_no_std::Error)]
 #[error(transparent)]
 pub struct InvalidCoreShare(#[from] InvalidShareReason);
 
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror_no_std::Error)]
 enum InvalidShareReason {
     #[error("`n` overflows u16")]
     NOverflowsU16,
@@ -411,7 +417,7 @@ enum InvalidShareReason {
 }
 
 /// Error related to HD key derivation
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror_no_std::Error)]
 pub enum HdError<E> {
     /// HD derivation is disabled for the key
     #[error("HD derivation is disabled for the key")]
@@ -489,7 +495,7 @@ pub fn reconstruct_secret_key<E: Curve>(
 
 /// Error indicating that [key reconstruction](reconstruct_secret_key) failed
 #[cfg(feature = "spof")]
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror_no_std::Error)]
 #[error("secret key reconstruction error")]
 pub struct ReconstructError(
     #[source]
@@ -498,7 +504,7 @@ pub struct ReconstructError(
 );
 
 #[cfg(feature = "spof")]
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror_no_std::Error)]
 enum ReconstructErrorReason {
     #[error("no key shares provided")]
     NoKeyShares,

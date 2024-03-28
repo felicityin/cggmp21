@@ -1,4 +1,4 @@
-use std::fmt;
+use core::fmt;
 
 /// Validated value
 ///
@@ -317,11 +317,11 @@ impl<T, E: fmt::Display> fmt::Display for ValidateError<T, E> {
     }
 }
 
-impl<T, E> std::error::Error for ValidateError<T, E>
+impl<T, E> core::error::Error for ValidateError<T, E>
 where
-    E: std::error::Error + 'static,
+    E: core::error::Error + 'static,
 {
-    fn source(&self) -> Option<&(dyn std::error::Error + 'static)> {
+    fn source(&self) -> Option<&(dyn core::error::Error + 'static)> {
         Some(&self.error)
     }
 }

@@ -1,6 +1,10 @@
 #[cfg(all(feature = "serde", feature = "hd-wallets"))]
 mod hex_or_bin;
 
+extern crate alloc;
+
+use alloc::vec::Vec;
+
 #[cfg(all(feature = "serde", feature = "hd-wallets"))]
 pub use hex_or_bin::HexOrBin;
 
